@@ -94,7 +94,7 @@
       }
     });
   </script>
-
+<!-- 
 <h2>สรุปผลการวิ่ง</h2>
 <iframe 
     src="https://docs.google.com/spreadsheets/d/e/2PACX-1vSx_aDZo64DH6qgyvDVhXlTdHJZQ8sFnxpfwlf111zdi-H-WNBMFQmHuJdp2QiZzeRZ-zZjvi-Wcvmv/pubchart?oid=628586982&amp;format=interactive"
@@ -102,7 +102,62 @@
     height="371" 
     frameborder="0" 
     scrolling="no">
-</iframe>
+</iframe> -->
+
+<!-- read data from google sheet and show chart in web -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<h2>Running Progress Chart</h2>
+<!-- <canvas id="runChart" width="50" height="25"></canvas> -->
+ <style>
+  #runChart {
+    width: 100%;
+    max-width: 700px;
+    height: 350px !important;
+    margin: 20px auto;
+    display: block;
+  }
+</style>
+
+<canvas id="runChart"></canvas>
+
+<script>
+async function loadChart() {
+  const SHEET_ID = "1UHnhiMWR5llntemSejmPWjibC5iCEhshoudYOle2Ktg";
+  const RANGE = "Responses!A:D"; // Adjust if your sheet name differs
+  const API = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=Responses`;
+
+  const res = await fetch(API);
+  const text = await res.text();
+  const json = JSON.parse(text.substring(47, text.length - 2));
+
+  const rows = json.table.rows.map(r => r.c.map(c => c?.v));
+
+  const labels = rows.map(r => r[0]);     // Timestamp
+  const distance = rows.map(r => r[2]);   // Distance column index
+
+  const ctx = document.getElementById('runChart');
+
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'Distance (km)',
+        data: distance,
+        borderWidth: 1,
+      }]
+    },
+    options: {
+      scales: {
+        y: { beginAtZero: true }
+      }
+    }
+  });
+}
+
+// Load chart when page opens
+document.addEventListener('DOMContentLoaded', loadChart);
+</script>
 </body>
 
 </html>
